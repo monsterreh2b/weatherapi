@@ -11,6 +11,31 @@ function updateByZip(zip){
    sendRequest(url);
 }
 
+function K2C(k){
+  return Math.round(k-273.15);
+}
+
+function K2F(k){
+  return Math.round(k*(9/5)-459.67);
+}
+
+function degreesToDirection(degrees){
+  var range =360/16;
+  var low = 360 -range/2;
+  var high = (low + range) % 360;
+  var angles = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
+  for (i in angles){
+    
+    if(degrees >=low && degrees < high)
+      return angles[i];
+    
+    low = (low + range) % 360;
+    high = (high + range) % 360;
+  }
+  return "N";
+  
+}
+
 function sendRequest(url){
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
@@ -18,12 +43,12 @@ function sendRequest(url){
        // Action to be performed when the document is read;
        var data = JSON.parse(xhttp.responseText);
        var newWeather = {};
-       newWeather.temp = data.main.temp;
+       newWeather.temp = K2F(data.main.temp);
        newWeather.loc = data.name;
        newWeather.icon = data.weather[0].id;
        newWeather.humidity = data.main.humidity;
        newWeather.wind = data.wind.speed;
-       newWeather.direction = data.wind.deg;
+       newWeather.direction = degreesToDirection(data.wind.deg);
       
        updateFrontEnd(newWeather);
        
@@ -44,6 +69,8 @@ function updateFrontEnd(weather){
 
 }
 
+
+
 window.onload = function () {
   temp = document.getElementById ("temperature");
   loc = document.getElementById ("location");
@@ -60,7 +87,13 @@ window.onload = function () {
   weather2.temp = "45";
   weather2.icon = 200;
   
-  updateByZip(88901);
+  if(!navigator.geolocation){
+  
+    
+  }else{
+    var zip = window.prompt("Please enter your zip code");
+    updateByZip(zip);
+  }
 }
 
 
